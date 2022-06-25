@@ -1,0 +1,168 @@
+# week 2 Review
+
+## Web Services
+* Web Service
+	- A service provided over the web via **web servers**
+	- HTTP is the protocol utilized for communication with web services
+	- Two types of services:
+		- SOAP (old) 
+		- REST (modern)
+* HTTP
+	- HyperText Transfer Protocol
+	- Traditionally used for web browsers to communicate with web servers
+		- Web browser is an example of a client
+		- Web server is an example of a server
+	- Revolves around the client-server model of communication
+		- Client initiates a request
+			- The client is always the one that starts the communication
+		- Server responds with a response
+	- HTTP Request
+		- Method/Verb
+			- GET, POST, PUT, PATCH, DELETE
+		- URI (Uniform resource identifier)
+			- ex. '/users'
+		- Request Body
+			- Optional
+		- Request Headers
+			- Provide metadata that the server may user
+			- ex. 'Content-Type: application/json'
+				- Indicates to the server that JSON is being sent in the request body.
+		- HTTP Version
+			- Indicates which version of the HTTP protocol is being used
+	- HTTP Response
+		- Status Code
+			- Categories
+				- 1XX series: informational
+				- 2XX series: Success
+				- 3XX series: Website redirects
+				- 4XX series: Client-side error
+					- Normal part of an application
+					- We need to anticipate what sort of things a user might do incorrectly when interacting with the application
+					- That's when we would do various checks in terms of our business logic in order to send back an appropriate 4XX status code in such an event
+				- 5XX series: Server-side error
+					- In general, this is caused by not handling an exception
+					- If an exception is allowed to propagate all the way to the bottom of the callstack without being handled, then it will default to 500 Internal Server Error for the status code
+					- Rule of thumb: avoid 500 internal server errors by actually thinking about different situations you might run into with a users' usage of the application
+						- You can connect this with the testing mindset where we should not only test the correct way of using the app, but also the incorrect way of using it (positive v. negative testing)
+			- Response Body
+				- Optional
+			- Response Headers
+				- Optional
+				- Provide metadata that the client may choose to use
+			- HTTP Version
+				- Indicates which version of the HTTP protocol is being used
+	* REST
+		- Representational State Transfer
+			- Data is represented in the form of resources
+			- It's a standard on how we utilize the HTTP protocol to send data around within modern web communication
+		- Utilized particularly for CRUD operations
+			- C - Create
+			- R - Read
+			- U - Update
+			- D - Delete
+		- CRUD operations are performed on resources
+		- HTTP verbs/methods are used according to proper convention
+			- Create - 'POST'
+			- Read - 'GET'
+			- Update - 'PUT' or 'PATCH'
+			- Delete - 'DELETE'
+		- Resources can have a hierarchy
+			- ex. '/users/bachy21/todos'
+				- Todos belong to a particular user resource
+				- "One user can  have many todos"
+			- You can also get a single resource from a "sub-collection"
+				- ex. '/users/bachy21/todos/<todo id>'
+		- Singleton and Collection resources
+			- Singleton: GET '/users/bachy21'
+			- Collection: GET '/users'
+		- Best practices for naming the URI
+			- Use nouns to represent resources
+			- Use - instead of _ to separate words in a resource
+				- ex. '/users/bachy21/user_info' is \[not ideal because the _ can get lost in some browsers\]
+				- ex. '/users/bachy21/user-info is \[preferred\]
+			- Use lowercase letters
+			- Don't use CRUD function names in URIs
+				- ex. POST '/createuser' \[do not use\]
+				- ex. POST '/users' \[preferred\]
+			- Use query parameters to filter collections of resources
+				- ex. GET '/users/bachy21/todos?completed=yes'
+					- 'completed=yes' is a query parameter
+			- No trailing forward slashes
+				- ex. '/users/bachy21/' is bad
+				- ex. '/users/bachy21' is good
+		- Path parameters v. Query parameters
+			- Path parameter
+				-Providing some sort of parameter such as user_id, username, etc. within the path
+					ex. '/users/<username>': username is a path parameter
+				- Should be used to identify a particular singleton (single entity of a type of resource)
+			- Query parameter
+				- Providing some sort of parameter after the path (denoted by a question mark to separate the path from the query parameter(s))
+					- ex. '/users?birthdaymonth=novermber&agegreaterthan=30'
+					- Get ALL users who were born in november and are older than 30
+				- Should be used to filter a collection of resources
+		- REST constraints
+			- Uniform interface
+				- The API should follow the same consistent format for all resources
+			- Client-server
+				- Client and server should be able to evolve independently from each other
+				- Client should only need to know the resource URIs
+					- Keep it simple
+			- Stateless
+				- The server will not store anything about previous HTTP requests
+				- Once a request is made and a response is provided, the server will  not remember that interaction
+				- In other words, the server does not keep track of any states
+			- Cacheable
+				- If the same data is requested over and over, there should be the ability to cache the response to improve system performance
+				- Instead of querying a database each time for the same info, we cache that data on the web server directly itself
+			- Layered system
+				- A complex system consisting of many different layers communicating with each other should be hidden from the client
+				- The client shouldn't need to know all of the complexity behind the scenes
+			- Code on demand (optional)
+				- Server can send executable code back to the client
+				- Optional
+				- Obvious security concerns
+	* Richardson Maturity Model
+		- Describes the maturity of the API (in terms of it being RESTful)
+		- 4 levels
+			- Level 0: POX Swamp
+				- Not really following any sort of convention
+				- We're just defining random endpoints that correspond to certain operations without really thinking about the structure of our resources and operations
+			- Level 1: Resources
+				- We still use HTTP verbs/methods randomly and don't follow convention for those
+				- But we now separate our resources into properly identified URIs
+			- Level 2: HTTP Verbs
+				-Utilize proper HTTP verbs/methods corresponding to the appropriate CRUD operation as well as well-defined resources from level 1
+			- Level 3: Hypermedia controls
+				- Introduces the concept of HATEOAS (Hypermedia as the engine of application state)
+				- Within the response body, there are links to other resources that can be used to inform the client what requests it might want to send for other related resources
+## Flask
+* Micro-framework used to create web APIs
+	- Micro: is very lightweight and simple, but extensible
+		- Flask as additional packages that can be installed if you choose to do so
+			- ex. 'flask-restful': adds additional features that a developer can use to simplify the development of a RESTful API
+		- Flask provides a built-in web server
+			- When we run our application, the web server will start up with the application itself
+			- This web server is abstracted away from us behind the scenes
+				- We don't need to worry about complexity of the actual web server code
+		- We can define various functions that will be executed whenever a request corresponding to the endpoint that is mapped to that function is received
+			- Endpoint:
+				- Identified by the HTTP verb/method + URI
+				- 'GET /users' is one endpoint
+				- 'POST /users' is another endpoint
+		- Flask can extract data from an HTTP request
+		- Flask can send data in the HTTP response back to the client
+
+## Python
+* Object-oriented programming
+	- A style of programming that revolves around the idea of objects
+	- Objects have
+		- Attributes (object scoped variables)
+		- Behaviors (methods)
+	- Method: a function defined inside a class
+		- Instance methods: a method that, when invoked, is able to modify the attributes of the particular object being interacted with through that method (an instance method is scoped to a particular object/instance)
+		- Static methods: a method that does not belong to a particular object. It belongs to the class
+			- Instance method approach
+				- 'p1.have_birthday()': increase the person's age by 1
+			- Static method approach
+				- 'Person.average_age(my_list_of_person_objects)': average_age is scoped to the class itself, not to an individual person object
+				
